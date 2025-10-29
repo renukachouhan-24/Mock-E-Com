@@ -57,6 +57,7 @@ Deno.serve(async (req: Request) => {
 
       if (cartError) throw cartError;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const items = cartItems.map((item: any) => ({
         id: item.id,
         productId: item.product_id,
@@ -67,7 +68,7 @@ Deno.serve(async (req: Request) => {
         subtotal: parseFloat(item.products.price) * item.quantity,
       }));
 
-      const total = items.reduce((sum: number, item: any) => sum + item.subtotal, 0);
+      const total = items.reduce((sum: number, item: { subtotal: number }) => sum + item.subtotal, 0);
 
       return new Response(JSON.stringify({ items, total }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -193,6 +194,7 @@ Deno.serve(async (req: Request) => {
         });
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const items = cartItems.map((item: any) => ({
         productId: item.products.id,
         name: item.products.name,
@@ -201,7 +203,7 @@ Deno.serve(async (req: Request) => {
         subtotal: parseFloat(item.products.price) * item.quantity,
       }));
 
-      const total = items.reduce((sum: number, item: any) => sum + item.subtotal, 0);
+      const total = items.reduce((sum: number, item: { subtotal: number }) => sum + item.subtotal, 0);
 
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -245,7 +247,8 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
