@@ -54,3 +54,5 @@ export const Header = () => {
     </header>
   );
 };
+
+// Redeploy the application
